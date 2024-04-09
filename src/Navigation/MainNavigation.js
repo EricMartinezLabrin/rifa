@@ -1,22 +1,74 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { StyleSheet, View, Text } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import Main from "../Screens/Main";
-import { StyleSheet } from "react-native";
+import Premios from "../Screens/Premios";
+import Gallery from "../Screens/Gallery";
+import GalleryList from "../Screens/GalleryList";
+import Tyc from "../Screens/Tyc";
 
 const Drawer = createDrawerNavigator();
 
 export default function MainNavigation() {
   return (
     <Drawer.Navigator>
-      <Drawer.Screen name="Feed" component={Main} />
-      <Drawer.Screen name="Article" component={Main} />
+      <Drawer.Screen
+        name="Inicio"
+        component={Main}
+        options={{
+          drawerLabel: "Números Disponibles",
+          drawerIcon: ({ color }) => (
+            <Ionicons name="home" color={color} size={26} />
+          ),
+          headerBackgroundContainerStyle: styles.menuHeader,
+        }}
+      />
+      <Drawer.Screen
+        name="Premios"
+        component={Premios}
+        options={{
+          drawerLabel: "Premios",
+          drawerIcon: ({ color }) => (
+            <Ionicons name="gift" color={color} size={26} />
+          ),
+          headerBackgroundContainerStyle: styles.menuHeader,
+        }}
+      />
+
+      <Drawer.Screen
+        name="Tyc"
+        component={Tyc}
+        options={{
+          drawerLabel: "Términos y Condiciones",
+          drawerIcon: ({ color }) => (
+            <Ionicons name="document" color={color} size={26} />
+          ),
+          headerBackgroundContainerStyle: styles.menuHeader,
+        }}
+      />
+      <Drawer.Screen
+        name="Gallery"
+        component={Gallery}
+        options={{
+          drawerLabel: () => null,
+          headerBackgroundContainerStyle: styles.menuHeader,
+        }}
+      />
+      <Drawer.Screen
+        name="GalleryList"
+        component={GalleryList}
+        options={{
+          drawerLabel: () => null,
+          headerBackgroundContainerStyle: styles.menuHeader,
+        }}
+      />
     </Drawer.Navigator>
   );
 }
 
 const styles = StyleSheet.create({
   menuHeader: {
-    backgroundColor: "red",
-    height: 150,
+    backgroundColor: "orange",
     alignItems: "center",
     justifyContent: "center",
   },
