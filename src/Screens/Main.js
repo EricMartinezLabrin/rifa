@@ -4,16 +4,34 @@ import {
   StyleSheet,
   Button,
   Pressable,
-  ScrollView,
+  RefreshControl,
 } from "react-native";
 import React from "react";
 import { FlatList } from "react-native-gesture-handler";
 import premios from "../Assets/premiosList";
+import { getRewardApi } from "../Api/backend";
+import { getTicketsApi } from "../Api/backend";
+import { getPlayerApi } from "../Api/backend";
+import { getStatusApi } from "../Api/backend";
 
-export default function main(props) {
+export default function Main(props) {
   const { navigation } = props;
   const [numberCharged, setNumberCharged] = React.useState(20);
   const [isVisible, setIsVisible] = React.useState(true);
+  const [rewards, setRewards] = React.useState([]);
+  const [tickets, setTickets] = React.useState([]);
+  const [players, setPlayers] = React.useState([]);
+  const [status, setStatus] = React.useState([]);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setRefreshing(false);
+  }, []);
+
+  const goToRegister = (selectedNumber) => {
+    navigation.navigate("Register", { selectedNumber: selectedNumber });
+  };
 
   const handleScroll = (event) => {
     if (event.nativeEvent.contentOffset.y > 50) {
@@ -444,64 +462,124 @@ export default function main(props) {
     navigation.navigate("Tyc");
   };
 
-  const btnBuy = (status) => {
-    if (status === null) {
-      return (
-        <Button
-          style={styles.numberList}
-          onPress={console.log("comprar")}
-          title="Comprar"
-        />
-      );
+  // getReward
+  React.useEffect(() => {
+    const getReward = async () => {
+      const response = await getRewardApi();
+      // const responseDecoded =response.json()
+      setRewards(response.rewards);
+    };
+
+    getReward();
+  }, []);
+
+  // getTickets
+  React.useEffect(() => {
+    const getTickets = async () => {
+      const response = await getTicketsApi();
+      setTickets(response.tickets);
+    };
+    getTickets();
+  }, [refreshing]);
+
+  // GetPlayer
+  React.useEffect(() => {
+    const getPlayer = async () => {
+      const response = await getPlayerApi();
+      setPlayers(response.player);
+    };
+    getPlayer();
+  }, []);
+
+  // GetStatus
+  React.useEffect(() => {
+    const getStatus = async () => {
+      const response = await getStatusApi();
+      setStatus(response.statuses);
+    };
+    getStatus();
+  }, []);
+
+  const findPlayer = (id) => {
+    const player = players.find((player) => player.id === id);
+    if (player) {
+      return player;
     }
-    return <Text>Vendido</Text>;
+    return null;
   };
+
+  const findStatus = (id) => {
+    const statuses = status?.find((item) => item.id == id);
+    if (statuses) {
+      return statuses.status;
+    }
+    return null;
+  };
+
   return (
     <View style={styles.container}>
-      {isVisible && (
-        <View style={styles.subcontainer}>
-          <Text style={styles.title}>¡Gran Rifa!</Text>
-          <Text style={styles.subtitle}>
-            Participa en nuestra rifa y gana alguno de los siguentes premios
-          </Text>
-          {premios.map((premio) => (
-            <Pressable onPress={goToPremios} style={styles.premiosContainer}>
-              <Text style={styles.bold}>Costo del Número: $200.00</Text>
-              <Text style={styles.bold}>{premio.id} lugar: </Text>
-              <Text>{premio.nombre}</Text>
+      <View style={styles.subcontainer}>
+        {isVisible && (
+          <View style={styles.subcontainer}>
+            <Text style={styles.title}>¡Gran Rifa!</Text>
+            <Text style={styles.subtitle}>
+              Participa en nuestra rifa y gana alguno de los siguentes premios
+            </Text>
+            <Text style={styles.bold}>Costo del Número: $200.00</Text>
+            {rewards &&
+              rewards.map((premio, index) => (
+                <Pressable
+                  onPress={goToPremios}
+                  style={styles.premiosContainer}
+                  key={index}
+                >
+                  <Text style={styles.bold}>{premio.id} lugar: </Text>
+                  <Text>{premio.nombre}</Text>
+                </Pressable>
+              ))}
+            <Pressable onPress={goToTyc}>
+              <Text style={styles.tyc}>Ver Reglas del sorteo</Text>
             </Pressable>
-          ))}
-          <Pressable onPress={goToTyc}>
-            <Text style={styles.tyc}>Ver Reglas del sorteo</Text>
-          </Pressable>
-          <Text style={styles.subtitle}>Numeros Disponibles</Text>
-        </View>
-      )}
-      <FlatList
-        data={data}
-        onScroll={handleScroll}
-        onEndReached={() => {
-          setNumberCharged(numberCharged + 20);
-        }}
-        onEndReachedThreshold={0.5}
-        renderItem={({ item }) => (
-          <View style={styles.numerosRifaContainer}>
-            <View style={styles.idName}>
-              <Text style={styles.numberList}>{item.id}: </Text>
-              <Text style={styles.numberList}>
-                {isDisponible(item.comprador)}
-              </Text>
-            </View>
-            <View style={styles.statusBuy}>
-              <Text style={styles.numberStatus}>
-                {isDisponible(item.status)}
-              </Text>
-
-              {btnBuy(item.status)}
-            </View>
+            <Text style={styles.subtitle}>Numeros Disponibles</Text>
           </View>
         )}
-      />
+        <FlatList
+          data={tickets}
+          onScroll={handleScroll}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          onEndReached={() => {
+            setNumberCharged(numberCharged + 20);
+          }}
+          onEndReachedThreshold={0.5}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.numerosRifaContainer}>
+              <View style={styles.idName}>
+                <Text style={styles.numberList}>{item.id}: </Text>
+                <Text style={styles.numberList}>
+                  {isDisponible(findPlayer(item.player_id)?.nombre)}
+                </Text>
+              </View>
+              <View style={styles.statusBuy}>
+                <Text style={styles.numberStatus}>
+                  {findStatus(item.status_id)}
+                </Text>
+                {item.status_id !== 1 ? (
+                  <Text>Vendido</Text>
+                ) : (
+                  <Button
+                    style={styles.numberList}
+                    onPress={() => goToRegister(item.id)}
+                    title="Comprar"
+                  />
+                )}
+              </View>
+            </View>
+          )}
+        />
+      </View>
     </View>
   );
 }
@@ -509,8 +587,13 @@ export default function main(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 20,
-    maxWidth: 700,
+    padding: 20,
+    alignItems: "center",
+  },
+  subcontainer: {
+    maxWidth: 900,
+    margin: 0,
+    padding: 0,
   },
   title: {
     fontSize: 20,

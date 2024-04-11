@@ -6,6 +6,8 @@ import Premios from "../Screens/Premios";
 import Gallery from "../Screens/Gallery";
 import GalleryList from "../Screens/GalleryList";
 import Tyc from "../Screens/Tyc";
+import Register from "../Screens/Register";
+import Stripe from "../Screens/Stripe";
 
 const Drawer = createDrawerNavigator();
 
@@ -47,6 +49,14 @@ export default function MainNavigation() {
         }}
       />
       <Drawer.Screen
+        name="Register"
+        component={Register}
+        options={{
+          drawerLabel: () => null,
+          headerBackgroundContainerStyle: styles.menuHeader,
+        }}
+      />
+      <Drawer.Screen
         name="Gallery"
         component={Gallery}
         options={{
@@ -57,6 +67,14 @@ export default function MainNavigation() {
       <Drawer.Screen
         name="GalleryList"
         component={GalleryList}
+        options={{
+          drawerLabel: () => null,
+          headerBackgroundContainerStyle: styles.menuHeader,
+        }}
+      />
+      <Drawer.Screen
+        name="Stripe"
+        component={Stripe}
         options={{
           drawerLabel: () => null,
           headerBackgroundContainerStyle: styles.menuHeader,

@@ -9,20 +9,27 @@ import {
   Pressable,
 } from "react-native";
 import React from "react";
-import picture from "../Assets/pictureLust";
-
+import { getPictureApi } from "../Api/backend";
+import { URL } from "../Api/backend";
 const width = Dimensions.get("window").width;
 const newWidth = width > 700 ? 700 : width;
 
 export default function Gallery(props) {
   const { navigate } = props.navigation;
   const { id } = props.route.params;
-  const images = picture.filter((pic) => pic.itemId === id);
-  const urlImages = images.map((image) => image.src);
-  const goToGalleryList = (idGallery) => {
-    navigate("GalleryList", { id: idGallery, urls: urlImages, lastId: id });
-  };
+  const [images, setImages] = React.useState([]);
 
+  React.useEffect(() => {
+    const urlImages = async () => {
+      const response = await getPictureApi(id);
+      setImages(response.pictures);
+    };
+    urlImages();
+  }, [id]);
+
+  const goToGalleryList = (idGallery) => {
+    navigate("GalleryList", { id: idGallery, urls: images, lastId: id });
+  };
   return (
     <View style={styles.container}>
       <FlatList
@@ -33,7 +40,10 @@ export default function Gallery(props) {
         renderItem={({ item }) => (
           <View>
             <Pressable onPress={() => goToGalleryList(item.id)}>
-              <Image source={{ uri: item.src }} style={styles.img} />
+              <Image
+                source={{ uri: `${URL}/media/${item.picture}` }}
+                style={styles.img}
+              />
             </Pressable>
             <Text>{item.title}</Text>
           </View>
