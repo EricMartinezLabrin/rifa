@@ -18,17 +18,18 @@ export default function Gallery(props) {
   const { navigate } = props.navigation;
   const { id } = props.route.params;
   const [images, setImages] = React.useState([]);
+  // console.log(id);
 
   React.useEffect(() => {
     const urlImages = async () => {
       const response = await getPictureApi(id);
-      setImages(response.pictures);
+      setImages(response?.pictures);
     };
     urlImages();
   }, [id]);
 
   const goToGalleryList = (idGallery) => {
-    navigate("GalleryList", { id: idGallery, urls: images, lastId: id });
+    navigate("GalleryList", { id: idGallery, urls: images });
   };
   return (
     <View style={styles.container}>
@@ -49,9 +50,12 @@ export default function Gallery(props) {
           </View>
         )}
       />
-      <View style={styles.backButton}>
-        <Button title="Volver al Premios" onPress={() => navigate("Premios")} />
-      </View>
+      <Pressable onPress={() => navigate("Inicio")} style={styles.buttonXlBuy}>
+        <Text style={styles.buttonText}>Comprar un Número</Text>
+      </Pressable>
+      <Pressable onPress={() => navigate("Premios")} style={styles.buttonXl}>
+        <Text style={styles.buttonText}>Volver a los Premios</Text>
+      </Pressable>
     </View>
   );
 }
@@ -72,5 +76,36 @@ const styles = StyleSheet.create({
   backButton: {
     margin: 10,
     padding: 10,
+  },
+  buttonXl: {
+    backgroundColor: "red",
+    padding: 15,
+    margin: 5,
+    width: "92%",
+    borderRadius: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 5,
+    alignSelf: "center",
+    alignItems: "center",
+  },
+  buttonXlBuy: {
+    backgroundColor: "green",
+    padding: 15,
+    margin: 5,
+    width: "92%",
+    borderRadius: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 5,
+    alignSelf: "center",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
   },
 });

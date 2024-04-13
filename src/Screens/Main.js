@@ -5,10 +5,9 @@ import {
   Button,
   Pressable,
   RefreshControl,
+  ScrollView,
 } from "react-native";
 import React from "react";
-import { FlatList } from "react-native-gesture-handler";
-import premios from "../Assets/premiosList";
 import { getRewardApi } from "../Api/backend";
 import { getTicketsApi } from "../Api/backend";
 import { getPlayerApi } from "../Api/backend";
@@ -24,22 +23,14 @@ export default function Main(props) {
   const [status, setStatus] = React.useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
 
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = () => {
     setRefreshing(true);
+    getTickets();
     setRefreshing(false);
-  }, []);
+  };
 
   const goToRegister = (selectedNumber) => {
     navigation.navigate("Register", { selectedNumber: selectedNumber });
-  };
-
-  const handleScroll = (event) => {
-    if (event.nativeEvent.contentOffset.y > 50) {
-      // ajusta este valor según tus necesidades
-      setIsVisible(false);
-    } else {
-      setIsVisible(true);
-    }
   };
 
   const numeros = [
@@ -445,8 +436,6 @@ export default function Main(props) {
     { id: 400, comprador: "Evvie", status: "01" },
   ];
 
-  const data = numeros.slice(0, numberCharged);
-
   const isDisponible = (status) => {
     if (status === null) {
       return "Disponible";
@@ -474,13 +463,13 @@ export default function Main(props) {
   }, []);
 
   // getTickets
+  const getTickets = async () => {
+    const response = await getTicketsApi();
+    setTickets(response.tickets);
+  };
   React.useEffect(() => {
-    const getTickets = async () => {
-      const response = await getTicketsApi();
-      setTickets(response.tickets);
-    };
     getTickets();
-  }, [refreshing]);
+  }, []);
 
   // GetPlayer
   React.useEffect(() => {
@@ -517,7 +506,12 @@ export default function Main(props) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View style={styles.subcontainer}>
         {isVisible && (
           <View style={styles.subcontainer}>
@@ -543,44 +537,35 @@ export default function Main(props) {
             <Text style={styles.subtitle}>Numeros Disponibles</Text>
           </View>
         )}
-        <FlatList
-          data={tickets}
-          onScroll={handleScroll}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          onEndReached={() => {
-            setNumberCharged(numberCharged + 20);
-          }}
-          onEndReachedThreshold={0.5}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.numerosRifaContainer}>
-              <View style={styles.idName}>
-                <Text style={styles.numberList}>{item.id}: </Text>
-                <Text style={styles.numberList}>
-                  {isDisponible(findPlayer(item.player_id)?.nombre)}
-                </Text>
-              </View>
-              <View style={styles.statusBuy}>
-                <Text style={styles.numberStatus}>
-                  {findStatus(item.status_id)}
-                </Text>
-                {item.status_id !== 1 ? (
-                  <Text>Vendido</Text>
-                ) : (
-                  <Button
-                    style={styles.numberList}
-                    onPress={() => goToRegister(item.id)}
-                    title="Comprar"
-                  />
-                )}
-              </View>
+        {tickets.map((ticket, index) => (
+          <View style={styles.numerosRifaContainer} key={index}>
+            <View style={styles.idName}>
+              <Text style={styles.numberList}>{ticket.id}: </Text>
+              <Text style={styles.numberList}>
+                {findPlayer(ticket.player_id)?.nombre}
+
+                {findPlayer(ticket.player_id)?.apellido != "Disponible" &&
+                  " " + findPlayer(ticket.player_id)?.apellido}
+              </Text>
             </View>
-          )}
-        />
+            <View style={styles.statusBuy}>
+              <Text style={styles.numberStatus}>
+                {findStatus(ticket.status_id)}
+              </Text>
+              {ticket.status_id !== 1 ? (
+                <Text>Vendido</Text>
+              ) : (
+                <Button
+                  style={styles.numberList}
+                  onPress={() => goToRegister(ticket.id)}
+                  title="Comprar"
+                />
+              )}
+            </View>
+          </View>
+        ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -588,12 +573,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    alignItems: "center",
+    // alignItems: "center",
   },
   subcontainer: {
     maxWidth: 900,
     margin: 0,
     padding: 0,
+    paddingBottom: 30,
   },
   title: {
     fontSize: 20,
@@ -614,6 +600,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginVertical: 10,
+    paddingBottom: 20,
   },
   numberList: {
     margin: 5,

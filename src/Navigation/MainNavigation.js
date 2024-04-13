@@ -8,6 +8,7 @@ import GalleryList from "../Screens/GalleryList";
 import Tyc from "../Screens/Tyc";
 import Register from "../Screens/Register";
 import Stripe from "../Screens/Stripe";
+import PagarPendientes from "../Screens/PagarPendientes";
 
 const Drawer = createDrawerNavigator();
 
@@ -48,6 +49,18 @@ export default function MainNavigation() {
           headerBackgroundContainerStyle: styles.menuHeader,
         }}
       />
+      <Drawer.Screen
+        name="Pagar Pendientes"
+        component={PagarPendientes}
+        options={{
+          drawerLabel: "Pagar Pendientes",
+          drawerIcon: ({ color }) => (
+            <Ionicons name="card" color={color} size={26} />
+          ),
+          headerBackgroundContainerStyle: styles.menuHeader,
+        }}
+      />
+
       <Drawer.Screen
         name="Register"
         component={Register}

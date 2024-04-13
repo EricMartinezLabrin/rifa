@@ -1,20 +1,27 @@
 import { Text, StyleSheet, ScrollView, Button, View } from "react-native";
 import React from "react";
+import { getTycApi } from "../Api/backend";
 
 export default function Tyc(props) {
   const { navigation } = props;
+  const [tyc, setTyc] = React.useState(null);
+
+  const getTyc = async () => {
+    const response = await getTycApi();
+    setTyc(response?.tyc);
+  };
+  getTyc();
 
   const goToMain = () => {
     navigation.navigate("Inicio");
   };
+
+  console.log(tyc);
   return (
     <ScrollView>
       <View style={styles.container}>
-        <Text style={styles.title}>Tyc</Text>
-        <Text style={styles.content}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        </Text>
+        <Text style={styles.title}>Terminos y Condiciones</Text>
+        <Text style={styles.content}>{tyc}</Text>
         <Button title="Ir a Inicio" onPress={goToMain} />
       </View>
     </ScrollView>
