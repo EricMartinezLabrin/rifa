@@ -1,4 +1,4 @@
-export const URL = "http://192.168.100.7:8000";
+export const URL = "https://apirifa.fadetechs.com";
 
 export const getRewardApi = async () => {
   try {

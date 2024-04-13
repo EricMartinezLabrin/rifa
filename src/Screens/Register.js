@@ -34,6 +34,7 @@ export default function Register(props) {
     navigation.navigate("Stripe", { player: player });
   };
   const goToWhatsApp = () => {
+    navigation.navigate("Inicio");
     Linking.openURL(
       "https://wa.me/5218333457263?text=Hola,%20me%20gustaría%20comprar%20el%20número%20" +
         selectedNumber
